@@ -1,5 +1,8 @@
-# 📡 Mapping Wi-Fi
-
+<div align="center">
+  <img width="100" height="100" alt="Design_sem_nome-removebg-preview" src="https://github.com/user-attachments/assets/d5595360-698e-4762-b3a9-edf5d49cab82" />
+  
+  # BatSignal Wi-Fi
+</div>
 
 Um aplicativo desktop para mapear e analisar a qualidade do sinal Wi-Fi em diferentes cômodos da sua casa.
 
@@ -65,28 +68,6 @@ python app_main.py
   - 🟠 Laranja: Bom (92-95%)
   - 🔴 Vermelho: Fraco (<92%)
 
-## 📂 Estrutura do Projeto
-
-```
-mapeador-wifi/
-├── app_main.py           # Interface gráfica principal
-├── wifi_coleta.py        # Lógica de coleta do sinal
-├── wifi_graficos.py      # Geração de gráficos
-├── wifi_dados.py         # Salvar/carregar dados em JSON
-├── dados/                # Pasta com mapeamentos salvos
-├── requirements.txt      # Dependências do projeto
-├── .gitignore           # Arquivos ignorados pelo git
-└── README.md            # Este arquivo
-```
-
-## 🛠️ Dependências
-
-- **pandas**: Manipulação e análise de dados
-- **openpyxl**: Criação de arquivos Excel
-- **matplotlib**: Geração de gráficos
-- **seaborn**: Estilo dos gráficos
-- **tkinter**: Interface gráfica (vem com Python)
-
 ## 💡 Dicas
 
 - **Melhor cobertura**: Coleta em vários pontos de cada cômodo para resultado mais preciso
@@ -97,15 +78,5 @@ mapeador-wifi/
 ## 🤝 Contribuindo
 
 Sinta-se livre para fazer fork, criar issues e enviar pull requests!
-
-## 📜 Licença
-
-MIT License
-
-## 👨‍💻 Autor
-
-Desenvolvido com ❤️
-
----
 
 **Aproveite o mapeador!** 📡✨
