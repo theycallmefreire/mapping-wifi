@@ -20,7 +20,7 @@ Um aplicativo desktop para mapear e analisar a qualidade do sinal Wi-Fi em difer
 
 1. **Clone o repositório:**
 ```bash
-git clone https://github.com/theycallmefreire/mapping-wifi.git
+git clone https://github.com/theycallmefreire/BatSignal-wifi
 cd mapeador-wifi
 ```
 
