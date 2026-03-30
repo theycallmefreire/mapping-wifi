@@ -1,33 +1,58 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+from PIL import Image, ImageTk
 import time
 from datetime import datetime
 import threading
 import pandas as pd
-from wifi_dados import salvar_mapeamento, carregar_mapeamento, listar_mapeamentos
+import os
 
 # Importa os módulos que criamos
 from wifi_coleta import get_wifi_strength
 from wifi_graficos import criar_grafico_linha, criar_grafico_barras
+from wifi_dados import salvar_mapeamento, carregar_mapeamento, listar_mapeamentos
 
 class AppWiFiComodos:
     def __init__(self, root):
         self.root = root
-        self.root.title("Mapeador de Wi-Fi - Por Cômodo")
+        self.root.title("BatSignal - Mapeador de Wi-Fi por Cômodo")
         self.root.geometry("900x700")
         self.root.resizable(True, True)
+        self.root.iconbitmap('.\imagens\logo.ico')
         
         # Dicionário pra armazenar dados de cada cômodo
         self.dados_por_comodo = {}
         self.comodo_atual = None
         self.coletando = False
         
-        # ===== Frame Superior =====
-        frame_top = ttk.Frame(root, padding="10")
-        frame_top.pack(fill=tk.X)
+        # ===== Carrega Logo =====
+        self.carregar_logo()
         
-        ttk.Label(frame_top, text="Mapeador de Wi-Fi por Cômodo", 
-                  font=("Arial", 14, "bold")).pack()
+        # ===== Frame Superior - Banner com Logo =====
+        frame_top = tk.Frame(root, bg="#000000", height=120)
+        frame_top.pack(fill=tk.X)
+        frame_top.pack_propagate(False)
+        
+        # Container centralizado
+        banner_content = tk.Frame(frame_top, bg="#000000")
+        banner_content.pack(expand=True, pady=10)
+        
+        # Logo
+        if self.logo_photo:
+            logo_label = tk.Label(banner_content, image=self.logo_photo, bg="#000000")
+            logo_label.pack(side=tk.LEFT, padx=20)
+        
+        # Texto ao lado
+        text_frame = tk.Frame(banner_content, bg="#000000")
+        text_frame.pack(side=tk.LEFT, padx=20)
+        
+        titulo = tk.Label(text_frame, text="BatSignal", 
+                         font=("Arial", 16, "bold"), bg="#000000", fg="#0078d4")
+        titulo.pack(anchor=tk.W)
+        
+        subtitulo = tk.Label(text_frame, text="Mapeador de Wi-Fi por Cômodo", 
+                            font=("Arial", 14), bg="#000000", fg="#666666")
+        subtitulo.pack(anchor=tk.W)
         
         # ===== Frame de Seleção de Cômodo =====
         frame_comodo = ttk.LabelFrame(root, text="Cômodo Atual", padding="10")
@@ -68,27 +93,28 @@ class AppWiFiComodos:
                                        command=self.proximo_comodo, state=tk.DISABLED)
         self.btn_proximo.pack(side=tk.LEFT, padx=5)
         
-        self.btn_graficos = ttk.Button(frame_buttons, text="📊 Ver Gráficos", 
+        self.btn_graficos = ttk.Button(frame_buttons, text="Ver Gráficos", 
                                         command=self.mostrar_graficos, state=tk.DISABLED)
         self.btn_graficos.pack(side=tk.LEFT, padx=5)
+        
+        self.btn_salvar = ttk.Button(frame_buttons, text="Salvar Mapeamento", 
+                                      command=self.salvar_dados, state=tk.NORMAL)
+        self.btn_salvar.pack(side=tk.LEFT, padx=5)
+        
+        self.btn_carregar = ttk.Button(frame_buttons, text="Carregar Mapeamento", 
+                                        command=self.carregar_dados)
+        self.btn_carregar.pack(side=tk.LEFT, padx=5)
         
         self.btn_exportar = ttk.Button(frame_buttons, text="Exportar Tudo", 
                                         command=self.exportar_excel, state=tk.DISABLED)
         self.btn_exportar.pack(side=tk.LEFT, padx=5)
-        self.btn_salvar = ttk.Button(frame_buttons, text="💾 Salvar Mapeamento", 
-                              command=self.salvar_dados, state=tk.NORMAL)
-        self.btn_salvar.pack(side=tk.LEFT, padx=5)
-
-        self.btn_carregar = ttk.Button(frame_buttons, text="📂 Carregar Mapeamento", 
-                                        command=self.carregar_dados)
-        self.btn_carregar.pack(side=tk.LEFT, padx=5)
         
         # ===== Frame de Status =====
         frame_status = ttk.LabelFrame(root, text="Status", padding="10")
         frame_status.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # Text widget
-        self.text_output = tk.Text(frame_status, height=8, width=100, state=tk.DISABLED)
+        self.text_output = tk.Text(frame_status, height=12, width=85, state=tk.DISABLED)
         self.text_output.pack(fill=tk.BOTH, expand=True)
         
         # Scrollbar
@@ -102,16 +128,29 @@ class AppWiFiComodos:
         
         self.label_resumo = ttk.Label(frame_resumo, text="Nenhum cômodo mapeado ainda")
         self.label_resumo.pack()
-        # ===== Frame de Nome do Mapeamento =====
+        
+        # ===== Frame com Nome do Mapeamento =====
         frame_nome = ttk.LabelFrame(root, text="Nome do Mapeamento", padding="10")
         frame_nome.pack(fill=tk.X, padx=10, pady=10)
-
+        
         ttk.Label(frame_nome, text="Nome:").pack(side=tk.LEFT, padx=5)
         self.nome_mapeamento_var = tk.StringVar(value="Mapeamento")
         ttk.Entry(frame_nome, textvariable=self.nome_mapeamento_var, width=30).pack(side=tk.LEFT, padx=5)
-
+        
         ttk.Label(frame_nome, text="(ex: Casa - Dia 1, Apartamento, etc)").pack(side=tk.LEFT, padx=5)
-
+    
+    def carregar_logo(self):
+        """Carrega a logo se existir"""
+        self.logo_photo = None
+        
+        if os.path.exists(".\imagens\logo.png"):
+            try:
+                img = Image.open(".\imagens\logo.png")
+                img.thumbnail((100, 100), Image.Resampling.LANCZOS)
+                self.logo_photo = ImageTk.PhotoImage(img)
+            except Exception as e:
+                print(f"Erro ao carregar logo: {e}")
+    
     def atualizar_texto(self, texto):
         """Atualiza o text widget de forma thread-safe"""
         self.text_output.config(state=tk.NORMAL)
@@ -147,7 +186,7 @@ class AppWiFiComodos:
         tempo_inicio = time.time()
         tempo_decorrido = 0
         
-        self.atualizar_texto(f"\n🔍 Coletando dados do cômodo: {comodo}")
+        self.atualizar_texto(f"\n🦇 Coletando dados do cômodo: {comodo}")
         self.atualizar_texto(f"   Duração: {segundos}s | Intervalo: {intervalo}s\n")
         
         while tempo_decorrido < segundos and self.coletando:
@@ -187,7 +226,6 @@ class AppWiFiComodos:
                 self.btn_proximo.config(state=tk.NORMAL)
                 self.btn_graficos.config(state=tk.NORMAL)
                 self.btn_exportar.config(state=tk.NORMAL)
-                
         else:
             self.atualizar_texto("\n⏸️ Coleta cancelada")
         
@@ -240,7 +278,7 @@ class AppWiFiComodos:
         self.entry_comodo.focus()
         self.btn_refazer.config(state=tk.DISABLED)
         self.btn_proximo.config(state=tk.DISABLED)
-        self.btn_salvar.config(state=tk.NORMAL)  # ← ADICIONA ISSO
+        self.btn_salvar.config(state=tk.NORMAL)
         self.atualizar_texto("➡️ Pronto pra coletar o próximo cômodo!\nDigite o nome e clique em 'Iniciar Coleta'")
     
     def mostrar_graficos(self):
@@ -260,59 +298,13 @@ class AppWiFiComodos:
         
         # ===== ABA 1: Gráfico de Linha =====
         frame_linha = ttk.Frame(notebook)
-        notebook.add(frame_linha, text="📈 Gráfico de Linha")
+        notebook.add(frame_linha, text="Gráfico de Linha")
         criar_grafico_linha(self.dados_por_comodo, frame_linha)
         
         # ===== ABA 2: Gráfico de Barras =====
         frame_barras = ttk.Frame(notebook)
-        notebook.add(frame_barras, text="📊 Gráfico de Barras")
+        notebook.add(frame_barras, text="Gráfico de Barras")
         criar_grafico_barras(self.dados_por_comodo, frame_barras)
-    
-    def exportar_excel(self):
-        """Exporta todos os dados para Excel"""
-        if not self.dados_por_comodo:
-            messagebox.showwarning("Aviso", "Nenhum dado coletado para exportar")
-            return
-        
-        try:
-            import pandas as pd
-        except ImportError:
-            messagebox.showerror("Erro", "pandas não instalado. Execute: pip install pandas openpyxl")
-            return
-        
-        arquivo = filedialog.asksaveasfilename(
-            defaultextension=".xlsx",
-            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")]
-        )
-        
-        if not arquivo:
-            return
-        
-        try:
-            with pd.ExcelWriter(arquivo, engine='openpyxl') as writer:
-                # Cria uma aba pra cada cômodo
-                for comodo, dados in self.dados_por_comodo.items():
-                    df = pd.DataFrame(dados)
-                    df.to_excel(writer, sheet_name=comodo[:31], index=False)
-                
-                # Cria uma aba de resumo
-                resumo_data = []
-                for comodo, dados in self.dados_por_comodo.items():
-                    forcas = [d['forca'] for d in dados]
-                    resumo_data.append({
-                        'Cômodo': comodo,
-                        'Mínimo (%)': min(forcas),
-                        'Máximo (%)': max(forcas),
-                        'Médio (%)': round(sum(forcas) / len(forcas), 1),
-                        'Medições': len(forcas)
-                    })
-                
-                df_resumo = pd.DataFrame(resumo_data)
-                df_resumo.to_excel(writer, sheet_name='Resumo', index=False)
-            
-            messagebox.showinfo("Sucesso", f"Mapeamento exportado para:\n{arquivo}")
-        except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao exportar: {e}")
     
     def salvar_dados(self):
         """Salva o mapeamento atual em JSON"""
@@ -337,7 +329,7 @@ class AppWiFiComodos:
         
         except Exception as e:
             messagebox.showerror("Erro", f"Erro: {e}")
-
+    
     def carregar_dados(self):
         """Abre uma janela pra selecionar um mapeamento salvo"""
         mapeamentos = listar_mapeamentos()
@@ -421,16 +413,63 @@ class AppWiFiComodos:
                     messagebox.showerror("Erro", "Falha ao deletar")
         
         btn_carregar = ttk.Button(frame_buttons_carregar, text="Carregar", 
-                                command=carregar_selecionado)
+                                  command=carregar_selecionado)
         btn_carregar.pack(side=tk.LEFT, padx=5)
         
         btn_deletar = ttk.Button(frame_buttons_carregar, text="Deletar", 
-                                command=deletar_selecionado)
+                                 command=deletar_selecionado)
         btn_deletar.pack(side=tk.LEFT, padx=5)
         
         btn_cancelar = ttk.Button(frame_buttons_carregar, text="Cancelar", 
-                                command=janela_carregar.destroy)
+                                  command=janela_carregar.destroy)
         btn_cancelar.pack(side=tk.LEFT, padx=5)
+    
+    def exportar_excel(self):
+        """Exporta todos os dados para Excel"""
+        if not self.dados_por_comodo:
+            messagebox.showwarning("Aviso", "Nenhum dado coletado para exportar")
+            return
+        
+        try:
+            import pandas as pd
+        except ImportError:
+            messagebox.showerror("Erro", "pandas não instalado. Execute: pip install pandas openpyxl")
+            return
+        
+        arquivo = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")]
+        )
+        
+        if not arquivo:
+            return
+        
+        try:
+            with pd.ExcelWriter(arquivo, engine='openpyxl') as writer:
+                # Cria uma aba pra cada cômodo
+                for comodo, dados in self.dados_por_comodo.items():
+                    df = pd.DataFrame(dados)
+                    df.to_excel(writer, sheet_name=comodo[:31], index=False)
+                
+                # Cria uma aba de resumo
+                resumo_data = []
+                for comodo, dados in self.dados_por_comodo.items():
+                    forcas = [d['forca'] for d in dados]
+                    resumo_data.append({
+                        'Cômodo': comodo,
+                        'Mínimo (%)': min(forcas),
+                        'Máximo (%)': max(forcas),
+                        'Médio (%)': round(sum(forcas) / len(forcas), 1),
+                        'Medições': len(forcas)
+                    })
+                
+                df_resumo = pd.DataFrame(resumo_data)
+                df_resumo.to_excel(writer, sheet_name='Resumo', index=False)
+            
+            messagebox.showinfo("Sucesso", f"Mapeamento exportado para:\n{arquivo}")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao exportar: {e}")
+
 # Executa a aplicação
 if __name__ == "__main__":
     root = tk.Tk()

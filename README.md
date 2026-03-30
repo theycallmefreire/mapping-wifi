@@ -1,4 +1,5 @@
-# 📡 Mapeador de Wi-Fi por Cômodo
+# 📡 Mapping Wi-Fi
+
 
 Um aplicativo desktop para mapear e analisar a qualidade do sinal Wi-Fi em diferentes cômodos da sua casa.
 
@@ -16,7 +17,7 @@ Um aplicativo desktop para mapear e analisar a qualidade do sinal Wi-Fi em difer
 
 1. **Clone o repositório:**
 ```bash
-git clone https://github.com/seu-usuario/mapeador-wifi.git
+git clone https://github.com/theycallmefreire/mapping-wifi.git
 cd mapeador-wifi
 ```
 
