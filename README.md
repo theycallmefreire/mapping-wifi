@@ -1,7 +1,6 @@
-<div align="center">
-  <img width="100" height="100" alt="Design_sem_nome-removebg-preview" src="https://github.com/user-attachments/assets/d5595360-698e-4762-b3a9-edf5d49cab82" />
-  
-  # BatSignal Wi-Fi
+<div >
+  <img width="3780" height="1890" alt="logo" src="https://github.com/user-attachments/assets/709df203-b33a-49f7-9a26-fa82e6268de2" />
+
 </div>
 
 Um aplicativo desktop para mapear e analisar a qualidade do sinal Wi-Fi em diferentes cômodos da sua casa.
